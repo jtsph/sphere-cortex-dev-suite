@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cortex Dev Suite · theSphere</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0c1210; --card:#15201b; --line:#2a3d34; --text:#e7f3ec; --muted:#9bb5a8; --accent:#3ddc97; }
+    body { margin:0; font-family: Georgia, serif; background:var(--bg); color:var(--text); }
+    main { max-width:880px; margin:0 auto; padding:40px 20px 72px; }
+    h1 { font-weight:500; letter-spacing:-0.03em; margin-bottom:8px; }
+    p, li { line-height:1.5; color:var(--muted); }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; }
+    .card h2 { margin:0 0 6px; font-size:18px; font-weight:500; color:var(--text); }
+    .ok { color:var(--accent); } .wait { color:#e2c16b; }
+    button { background:var(--accent); color:#062116; border:0; border-radius:999px; padding:10px 16px; font-weight:700; cursor:pointer; }
+    code { font-family: ui-monospace, monospace; font-size:13px; }
+    @media (max-width:700px) { .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <p class="ok">cortex.thesphere.online · sustainable software suite</p>
+  <h1>Cortex development suite</h1>
+  <p>Control surface for the Sphere stack. This deployment is the shell. Payment rails and model keys stay in your own merchant and API accounts. No card numbers, bank logins, direct-debit mandates, or wallet seeds are collected here.</p>
+  <div class="grid">
+    <section class="card"><h2>Vercel</h2><p class="ok">Linked deploy target for this repository.</p></section>
+    <section class="card"><h2>ChatGPT / model API</h2><p class="wait">Needs an OpenAI key in Vercel env as OPENAI_API_KEY. Not stored in the repo.</p></section>
+    <section class="card"><h2>MetaMask / BNB</h2><p>Browser wallet only. Chain id 56 is suggested if the user approves. <button id="connect">Connect wallet</button></p><p id="wallet">Not connected.</p></section>
+    <section class="card"><h2>Lloyds</h2><p class="wait">No public deploy API. Use Open Banking via a regulated provider you contract.</p></section>
+    <section class="card"><h2>Revolut</h2><p class="wait">Merchant API key required. Do not paste it into chat.</p></section>
+    <section class="card"><h2>Apple Pay</h2><p class="wait">Requires a verified domain, merchant id, and a processor such as Stripe or Adyen.</p></section>
+    <section class="card"><h2>Visa / Mastercard</h2><p class="wait">Acquiring is through a PSP. This site is not a card processor.</p></section>
+    <section class="card"><h2>Direct debits</h2><p class="wait">UK Bacs via a sponsor such as GoCardless. Mandate setup stays on their hosted flow.</p></section>
+  </div>
+  <h2>What still has to be done by you</h2>
+  <ol>
+    <li>Point <code>cortex.thesphere.online</code> at this Vercel project.</li>
+    <li>Add processor keys in Vercel project settings, not in git.</li>
+    <li>Complete KYC with the payment provider before taking money.</li>
+  </ol>
+</main>
+<script>
+  document.getElementById('connect').onclick = async () => {
+    const out = document.getElementById('wallet');
+    if (!window.ethereum) { out.textContent = 'No injected wallet. Install MetaMask.'; return; }
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      try {
+        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] });
+      } catch (e) {
+        if (e.code === 4902) {
+          await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x38', chainName: 'BNB Smart Chain', nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 }, rpcUrls: ['https://bsc-dataseed.binance.org'], blockExplorerUrls: ['https://bscscan.com'] }] });
+        }
+      }
+      out.textContent = 'Connected ' + accounts[0] + ' (BNB chain requested).';
+    } catch (err) {
+      out.textContent = err.message || 'Wallet request rejected.';
+    }
+  };
+</script>
+</body>
+</html>
